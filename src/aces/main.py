@@ -109,7 +109,7 @@ class ACES(TokenClassificationPipeline):
         # Process the model outputs
         if isinstance(model_outputs, list):
             model_outputs = model_outputs[0]
-        logits = model_outputs["logits"][0].numpy()
+        logits = model_outputs["logits"][0].float().numpy()
 
         # Calculate scores from logits
         maxes = np.max(logits, axis=-1, keepdims=True)

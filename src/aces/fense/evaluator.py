@@ -28,7 +28,17 @@ def load_pretrain_echecker(echecker_model, device='cuda', use_proxy=False, proxi
     file_path = check_download_resource(remote, use_proxy, proxies)
     model_states = torch.load(file_path)
     clf = BERTFlatClassifier(model_type=model_states['model_type'], num_classes=model_states['num_classes'])
-    clf.load_state_dict(model_states['state_dict'])
+    
+    # Handle potential incompatible keys due to transformers library version differences
+    state_dict = model_states['state_dict']
+    # Remove problematic keys if they exist
+    keys_to_remove = ['encoder.embeddings.position_ids']
+    for key in keys_to_remove:
+        if key in state_dict:
+            print(f"Removing incompatible key from state_dict: {key}")
+            del state_dict[key]
+    
+    clf.load_state_dict(state_dict, strict=False)
     clf.eval()
     clf.to(device)
     return clf
